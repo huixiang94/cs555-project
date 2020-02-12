@@ -38,9 +38,9 @@ public class GED {
 
     
     public void traversal() throws FileNotFoundException, IOException, ParseException {
-        String indKey = null, famKey = null;//用两个key控制扫描与记录的步骤
+        String indKey = null, famKey = null;
         File GEDfile = new File("resource/family-tree.ged");
-        SimpleDateFormat formatter = new SimpleDateFormat ("d MMM yyyy", Locale.ENGLISH);//根据预设格式解析字符串，以转换成时间类
+        SimpleDateFormat formatter = new SimpleDateFormat ("d MMM yyyy", Locale.ENGLISH);
         String line;  
         
         try {
@@ -49,7 +49,7 @@ public class GED {
             while(sc.hasNextLine()) {
                 line = sc.nextLine().trim();
                 
-                if (line.startsWith("0") && line.endsWith("INDI")) {// 只有在0 level和INDI标签下，才会更换个人key和创建一个新人
+                if (line.startsWith("0") && line.endsWith("INDI")) {// the individual element start with INDI and end with INDI
                     indKey = line.substring(line.indexOf('@') + 1, line.lastIndexOf('@'));
                     Individual person = new Individual();
                     individuals.put(indKey, person);
@@ -57,7 +57,7 @@ public class GED {
                 }
                 else if (line.contains("NAME")) {
                     if (indKey != null) {
-                    individuals.get(indKey).setName(line.substring(7));//因为去掉前后空格之后，固定从7号位开始是名字，不用split的一个原因是name存在空格，处理会多两句话
+                    individuals.get(indKey).setName(line.substring(7));
                     }
                 }
                 else if (line.contains("SEX")) {
@@ -67,7 +67,7 @@ public class GED {
                     if (sc.hasNextLine()) {
                         line = sc.nextLine().trim();
                         
-                        if (line.startsWith("2") && line.contains("DATE")) {//没写异常，所以会出现信息不合法，那么这个属性不过为空，一个方案是自己写异常，另一个方案是个人这个类增加一个属性记录个人信息是否合法
+                        if (line.startsWith("2") && line.contains("DATE")) {
                             individuals.get(indKey).setBirthday(formatter.parse(line.substring(7)));
                         }
                     }
@@ -126,7 +126,7 @@ public class GED {
             
             //get husband's name and wife's name by the connection between two classes
 
-            for (Map.Entry<String, Family> famEnt : families.entrySet()) {//整个集合跑一遍，用来给丈夫和妻子的名字赋值，因为GEDCOM的家庭只记录id，没有名字，所以需要另外去个人信息调出来
+            for (Map.Entry<String, Family> famEnt : families.entrySet()) {//set value to husband and wife
                 famEnt.getValue().setHusbandName(individuals.get(famEnt.getValue().getHusbandID()).getName());
                 famEnt.getValue().setWifeName(individuals.get(famEnt.getValue().getWifeID()).getName());
             }

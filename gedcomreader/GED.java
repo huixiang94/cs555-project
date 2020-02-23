@@ -35,20 +35,19 @@ public class GED {
         this.errors = new LinkedHashSet();
     }
 
-    private void checkErrors () {//????????user story????????????check?????????????????????????????????????
+    private void checkErrors () {// user story check
         datesBeforeCurrentDate ();//US01
         birthBeforeMarriage ();//US02
         birthBeforeDeath();//US03
         marriageBeforeDivorce();//US04
         marriageBeforeDeath();//US05
         divorceBeforeDeath();//US06
-
     }
     
     public void traversal() throws FileNotFoundException, IOException, ParseException {
         String indKey = null, famKey = null;
         File GEDfile = new File("resource/family-tree.ged");
-        SimpleDateFormat formatter = new SimpleDateFormat ("d MMM yyyy", Locale.ENGLISH);//???????????????????
+        SimpleDateFormat formatter = new SimpleDateFormat ("d MMM yyyy", Locale.ENGLISH);
         String line;  
         
         try {
@@ -411,30 +410,32 @@ public class GED {
         }
     }
 
-    private void marriageBeforeDeath() { //US05
+    public void marriageBeforeDeath() { //US05
         Iterator<Map.Entry<String, Individual>> indIt = individuals.entrySet().iterator();
-
         try {
             while (indIt.hasNext()) {
                 Map.Entry<String, Individual> indEnt = indIt.next();
                 Iterator<String> spIt = indEnt.getValue().getFAMS().iterator();
-
-                while (spIt.hasNext()) {
+                while (indEnt.getValue().getFAMS()!=null&&spIt.hasNext()) {
                     String str = spIt.next();
 
                     if (families.get(str).getMarried() == null) {
-
                     }
                     else if (indEnt.getValue().getDeath() == null) {
-
                     }
-                    else if (families.get(str).getMarried().after(indEnt.getValue().getDeath()))
+                    else if (compareDate(families.get(str).getMarried(),indEnt.getValue().getDeath()))
                         errors.add("Error US05: Marriaged date of " + indEnt.getValue().getName() + "(" + indEnt.getValue().getID() + ") in the family of " + families.get(str).getID() + " is after the death date.");
                 }
             }
         } catch (Exception e) {
             System.err.println(e.toString());
         }
+    }
+    public static boolean compareDate(Date first, Date second){
+        if(first.after(second)){
+            return true;
+        }
+        return false;
     }
 
     private void divorceBeforeDeath() { //US06
@@ -445,7 +446,7 @@ public class GED {
                 Map.Entry<String, Individual> indEnt = indIt.next();
                 Iterator<String> spIt = indEnt.getValue().getFAMS().iterator();
 
-                while (spIt.hasNext()) {
+                while (indEnt.getValue().getFAMS()!=null&&spIt.hasNext()) {
                     String str = spIt.next();
 
                     if (families.get(str).getDivorced() == null) {
@@ -454,7 +455,7 @@ public class GED {
                     else if (indEnt.getValue().getDeath() == null) {
 
                     }
-                    else if (families.get(str).getMarried().after(indEnt.getValue().getDeath()))
+                    else if (compareDate(families.get(str).getDivorced(),indEnt.getValue().getDeath()))
                         errors.add("Error US06: Divorced date of " + indEnt.getValue().getName() + "(" + indEnt.getValue().getID() + ") in the family of " + families.get(str).getID() + " is after the death date.");
                 }
             }

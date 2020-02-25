@@ -35,7 +35,7 @@ public class testus03 {
         assertTrue(true);
 
         // Test #5
-        if (!instance.errors.contains("Error US03: Birthday of Terence /Holland/(I10) occurs after death date.")) {
+        if (!instance.errors.contains("Error US03: Birthday of Rone /Jams/(I4) occurs after death date.")) {
             fail("the first exception information is wrong");
         }
         else {

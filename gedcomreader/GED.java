@@ -36,6 +36,8 @@ public class GED {
     }
 
     private void checkErrors () {// user story check
+        individualsPrint();
+        familiesPrint();
         datesBeforeCurrentDate ();//US01
         birthBeforeMarriage ();//US02
         birthBeforeDeath();//US03

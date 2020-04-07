@@ -37,10 +37,12 @@ public class GED {
         divorceBeforeDeath();//US06
         lessThan150();//US07
         birthBeforeMarriageOfParents();//US08
-        BirthBeforeDeathOfParents();//US09
+        BirthBeforeDeathOfParents ();//US09
         MarriageAfter14();//US10
         noBigamy();//US11
         parentNotoold();//US12
+        fewerThan15Siblings(); //US15
+        correctGender(); //US21
     }
 
     public void traversal() throws FileNotFoundException, IOException, ParseException {
@@ -535,7 +537,7 @@ public class GED {
             System.err.println(e.toString());
         }
     }
-    private void BirthBeforeDeathOfParents () {//US09
+   public void BirthBeforeDeathOfParents () {//US09
         try {
             for (Map.Entry<String,Family> entry: families.entrySet()) {
                 if (individuals.get(entry.getValue().getHusbandID()).getDeath() != null ||
@@ -560,7 +562,7 @@ public class GED {
         }
     }
 
-    private void MarriageAfter14() {//US10
+    public void MarriageAfter14() {//US10
         try {
             for (Map.Entry<String, Family> entry: families.entrySet()) {
                 if (getAgeByBirth(individuals.get(entry.getValue().getHusbandID()).getBirthday()) < 14) {
@@ -643,6 +645,49 @@ public class GED {
             System.err.println(e.toString());
         }
     }
+    private void fewerThan15Siblings() { //US15
+        Iterator<Map.Entry<String, Family>> famIt = families.entrySet().iterator();
+
+        try {
+            while (famIt.hasNext()) {
+                Map.Entry<String, Family> famEnt = famIt.next();
+                Iterator<String> chIt = famEnt.getValue().getChildren().iterator();
+                int count = 0;
+
+                while (chIt.hasNext()) {
+                    String str = chIt.next();
+                    if (famEnt.getValue().getChildren() == null) {
+                    }else{
+                        count += 1;
+                    }
+                }
+                //System.out.print(famEnt.getValue().getID()+" "  + count +" ");
+                if(count >= 15)
+                    errors.add("Error US15: Family (" + famEnt.getValue().getID() + ") " + "have 15 or more siblings");
+            }
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+    }
+
+    private void correctGender() { //US21
+        Iterator<Map.Entry<String, Family>> famIt = families.entrySet().iterator();
+
+        try {
+            while (famIt.hasNext()) {
+                Map.Entry<String, Family> famEnt = famIt.next();
+                if (individuals.get(famEnt.getValue().getHusbandID()).getGender() == 'F') {
+                    errors.add("Error US21: Husband in family "+famEnt.getValue().getID()+ " has a wrong gender.");
+                }
+                if (individuals.get(famEnt.getValue().getWifeID()).getGender() == 'M') {
+                    errors.add("Error US21: Wife in family "+famEnt.getValue().getID()+" has a wrong gender.");
+                }
+            }
+        }catch (Exception e) {
+            System.out.println(e.toString());
+        }
+    }
+
 
     public void errorsPrint() {
         checkErrors();//check with users stories

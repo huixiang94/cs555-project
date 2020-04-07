@@ -27,23 +27,21 @@ public class GED {
     }
 
     private void checkErrors() {// user story check
-        individualsPrint();
-        familiesPrint();
-        datesBeforeCurrentDate();//US01
-        birthBeforeMarriage();//US02
-        birthBeforeDeath();//US03
-        marriageBeforeDivorce();//US04
-        marriageBeforeDeath();//US05
-        divorceBeforeDeath();//US06
-        lessThan150();//US07
-        birthBeforeMarriageOfParents();//US08
-        noBigamy();//US11
+//        individualsPrint();
+//        familiesPrint();
+//        datesBeforeCurrentDate();//US01
+//        birthBeforeMarriage();//US02
+//        birthBeforeDeath();//US03
+//        marriageBeforeDivorce();//US04
+//        marriageBeforeDeath();//US05
+//        divorceBeforeDeath();//US06
+//        noBigamy();//US11
         parentNotoold();//US12
     }
 
     public void traversal() throws FileNotFoundException, IOException, ParseException {
         String indKey = null, famKey = null;
-        File GEDfile = new File("resource/family-tree.ged");
+        File GEDfile = new File("US11test.ged");
         SimpleDateFormat formatter = new SimpleDateFormat("d MMM yyyy", Locale.ENGLISH);
         String line;
 
@@ -129,46 +127,7 @@ public class GED {
         }
 
     }
-    private static int getAgeByBirthAndDeath(Date birthday, Date Death) {
-        int age = 0;
 
-        try {
-            Calendar now = Calendar.getInstance();
-            now.setTime(new Date());
-
-            Calendar birth = Calendar.getInstance();
-            Calendar death = Calendar.getInstance();
-            birth.setTime(birthday);
-
-            if(Death == null){
-            }
-            if (birth.after(now)) {
-                age = 0;
-            } else{
-                age = now.get(Calendar.YEAR) - birth.get(Calendar.YEAR);
-                if (now.get(Calendar.DAY_OF_YEAR) < birth.get(Calendar.DAY_OF_YEAR)) {
-                    age -= 1;
-                }
-            }
-
-            if(Death != null){
-                death.setTime(Death);
-                if(birth.after(death)){
-                    age = 0;
-                }else{
-                    age = death.get(Calendar.YEAR) - birth.get(Calendar.YEAR);
-                    if (death.get(Calendar.DAY_OF_YEAR) < birth.get(Calendar.DAY_OF_YEAR)) {
-                        age -= 1;
-                    }
-                }
-            }
-
-            return age;
-        } catch (Exception e) {
-            System.err.println(e.toString());
-            return -1;
-        }
-    }
     private static int getAgeByBirth(Date birthday) {//US27
         int age = 0;
 
@@ -476,63 +435,6 @@ public class GED {
             System.err.println(e.toString());
         }
     }
-    private void lessThan150() { //US07
-        Date now = new Date();
-        Iterator<Map.Entry<String, Individual>> indIt = individuals.entrySet().iterator();
-
-        try {
-            while(indIt.hasNext()){
-                Map.Entry<String, Individual> indEnt = indIt.next();
-                Iterator<String> spIt = indEnt.getValue().getFAMS().iterator();
-                int age;
-                if (indEnt.getValue().getDeath() == null){
-                    age = GED.getAgeByBirthAndDeath(indEnt.getValue().getBirthday(), now);
-                }
-                else{
-                    age = GED.getAgeByBirthAndDeath(indEnt.getValue().getBirthday(),indEnt.getValue().getDeath());
-                }
-                if (age > 150){
-                    errors.add("Error US07: age ofDinkar /Chikane/is greater than 150.");
-                }
-            }
-        }catch (Exception e) {
-            System.out.println(e.toString());
-        }
-    }
-
-    private void birthBeforeMarriageOfParents() { //US08
-        Iterator<Map.Entry<String, Individual>> indIt = individuals.entrySet().iterator();
-        Calendar birth = Calendar.getInstance();
-        Calendar divorced = Calendar.getInstance();
-
-        try {
-            while (indIt.hasNext()) {
-                Map.Entry<String, Individual> indEnt = indIt.next();
-                Iterator<String> famcIt = indEnt.getValue().getFAMC().iterator();
-
-                while (famcIt.hasNext()) {
-                    String str = famcIt.next();
-                    birth.setTime(indEnt.getValue().getBirthday());
-                    divorced.setTime(families.get(str).getMarried());
-
-                    if (families.get(str).getMarried() == null) {
-
-                    }
-                    else if (indEnt.getValue().getBirthday() == null) {
-
-                    }else if (families.get(str).getDivorced() == null) {
-
-                    }
-                    else if (families.get(str).getMarried().after(indEnt.getValue().getBirthday()))
-                        errors.add("Error US08: Birthday of " + indEnt.getValue().getName() + "(" + indEnt.getValue().getID() + ") in the family of " + families.get(str).getID() + " is before the marriage of parents.");
-                    else if (((birth.get(Calendar.YEAR) - divorced.get(Calendar.YEAR))*12 + (birth.get(Calendar.MONTH) - divorced.get(Calendar.MONTH)) > 9))
-                        errors.add("Error US08: Birthday of " + indEnt.getValue().getName() + "(" + indEnt.getValue().getID() + ") in the family of " + families.get(str).getID() + " is more than 9 months after parents divorce.");
-                }
-            }
-        } catch (Exception e) {
-            System.err.println(e.toString());
-        }
-    }
     public void noBigamy(){ //US11
         Iterator<Map.Entry<String, Family>> famIt = families.entrySet().iterator();
         Set<String> id = new HashSet<>();
@@ -593,7 +495,7 @@ public class GED {
 
     public void errorsPrint() {
         checkErrors();//check with users stories
-        File fileOut = new File("resource/family-tree.txt");
+        File fileOut = new File("US12error.txt");
         Iterator<String> errIt = errors.iterator();
 
         try {

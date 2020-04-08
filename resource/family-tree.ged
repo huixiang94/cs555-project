@@ -64,9 +64,9 @@
 2 DATE 21 AUG 2021
 1 FAMS @F2@
 0 @I6@ INDI
-1 NAME Lili /Jams/
-2 GIVN Lili
-2 SURN Jams
+1 NAME Mary /Smith/
+2 GIVN Mary
+2 SURN Smith
 2 _MARNM Evens
 1 SEX F
 1 BIRT
@@ -75,9 +75,9 @@
 1 FAMS @F5@
 1 FAMC @F2@
 0 @I7@ INDI
-1 NAME Jason /Evans/
-2 GIVN Jason
-2 SURN Evans
+1 NAME Petter /Jams/
+2 GIVN Petter
+2 SURN Jams
 2 _MARNM Evens
 1 SEX M
 1 BIRT
@@ -378,7 +378,7 @@
 1 WIFE @I6@
 1 CHIL @I10@
 1 MARR
-2 DATE 23 OCT 1978
+2 DATE 9 JUL 2012
 1 DIV
 2 DATE 9 APR 1977
 1 _CURRENT Y

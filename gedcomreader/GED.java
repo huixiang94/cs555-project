@@ -43,6 +43,8 @@ public class GED {
         parentNotoold();//US12
         fewerThan15Siblings(); //US15
         correctGender(); //US21
+        uniqueNameAndBirth();//US23
+        uniqueFamilyBySpouse();//US24
         parentMarryDescendants();//US17
         noSiblingMarry();//US18
     }
@@ -539,7 +541,7 @@ public class GED {
             System.err.println(e.toString());
         }
     }
-   public void BirthBeforeDeathOfParents () {//US09
+    public void BirthBeforeDeathOfParents () {//US09
         try {
             for (Map.Entry<String,Family> entry: families.entrySet()) {
                 if (individuals.get(entry.getValue().getHusbandID()).getDeath() != null ||
@@ -689,6 +691,56 @@ public class GED {
             System.out.println(e.toString());
         }
     }
+
+    private void uniqueNameAndBirth() { //US23
+        Iterator<Map.Entry<String,Individual>> indIt = individuals.entrySet().iterator();
+
+        SimpleDateFormat birthDateFormat = new SimpleDateFormat("MM-dd-yyyy");
+
+        try {
+            while (indIt.hasNext()) {
+                Map.Entry<String, Individual> indEnt = indIt.next();
+                Iterator<Map.Entry<String,Individual>> indIt2 = individuals.entrySet().iterator();
+
+                while(indIt2.hasNext()) {
+                    Map.Entry<String, Individual> indEnt2 = indIt2.next();
+                    if (indEnt.getValue().getName().equals(indEnt2.getValue().getName()) && indEnt.getValue().getID() != indEnt2.getValue().getID()) {
+                        errors.add("US23 Error: There are two same names: "+ indEnt.getValue().getName());
+                    }
+
+                    if (indEnt.getValue().getBirthday().equals(indEnt2.getValue().getBirthday())  && indEnt.getValue().getID() != indEnt2.getValue().getID()) {
+                        errors.add(String.format("US23 Error: There are two same birthdays: " + birthDateFormat.format(indEnt.getValue().getBirthday())));
+                    }
+                }
+
+            }
+        }catch (Exception e) {
+            System.out.println(e.toString());
+        }
+
+    }
+
+    private void uniqueFamilyBySpouse () {//US24
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Map<String, Family> tempFamilies = new LinkedHashMap(families);
+        try {
+            for (Map.Entry<String, Family> en1 : families.entrySet()) {
+                tempFamilies.remove(en1.getKey());
+                for (Map.Entry<String, Family> en2 : tempFamilies.entrySet()) {
+                    if (en1.getValue().getHusbandName().equals(en2.getValue().getHusbandName()) &&
+                            en1.getValue().getWifeName().equals(en2.getValue().getWifeName())       &&
+                            en1.getValue().getMarried().equals(en2.getValue().getMarried())) {
+                        errors.add("Error US24: there are 2 families(" + en1.getValue().getID() + " and " + en2.getValue().getID() + ") with the same spouses(" + en1.getValue().getHusbandName() + " and " + en1.getValue().getWifeName() + ") getting married in the same date " + formatter.format(en1.getValue().getMarried()));
+                    }
+
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+    }
+
+
     /**
      * parents can not married child or brother sister's child
      */

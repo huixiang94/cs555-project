@@ -19,11 +19,16 @@ public class GED {
     Map<String, Individual> individuals;
     Map<String, Family> families;
     Set<String> errors;
+    Set<String> deceased;
+    Set<String> livingMarried;
 
     public GED() {
         this.individuals = new LinkedHashMap();
         this.families = new LinkedHashMap();
         this.errors = new LinkedHashSet();
+        this.deceased = new LinkedHashSet();
+        this.livingMarried = new LinkedHashSet();
+
     }
 
     private void checkErrors() {// user story check
@@ -43,10 +48,9 @@ public class GED {
         parentNotoold();//US12
         fewerThan15Siblings(); //US15
         correctGender(); //US21
-        uniqueNameAndBirth();//US23
-        uniqueFamilyBySpouse();//US24
-        parentMarryDescendants();//US17
-        noSiblingMarry();//US18
+        listDeceased();//US29
+        listLivingMarried(); //US30
+
     }
 
     public void traversal() throws FileNotFoundException, IOException, ParseException {
@@ -541,7 +545,7 @@ public class GED {
             System.err.println(e.toString());
         }
     }
-    public void BirthBeforeDeathOfParents () {//US09
+   public void BirthBeforeDeathOfParents () {//US09
         try {
             for (Map.Entry<String,Family> entry: families.entrySet()) {
                 if (individuals.get(entry.getValue().getHusbandID()).getDeath() != null ||
@@ -692,168 +696,46 @@ public class GED {
         }
     }
 
-    private void uniqueNameAndBirth() { //US23
-        Iterator<Map.Entry<String,Individual>> indIt = individuals.entrySet().iterator();
-
-        SimpleDateFormat birthDateFormat = new SimpleDateFormat("MM-dd-yyyy");
+    private void listDeceased() { //US29
+        Iterator<Map.Entry<String, Individual>> indIt = individuals.entrySet().iterator();
 
         try {
             while (indIt.hasNext()) {
                 Map.Entry<String, Individual> indEnt = indIt.next();
-                Iterator<Map.Entry<String,Individual>> indIt2 = individuals.entrySet().iterator();
 
-                while(indIt2.hasNext()) {
-                    Map.Entry<String, Individual> indEnt2 = indIt2.next();
-                    if (indEnt.getValue().getName().equals(indEnt2.getValue().getName()) && indEnt.getValue().getID() != indEnt2.getValue().getID()) {
-                        errors.add("US23 Error: There are two same names: "+ indEnt.getValue().getName());
-                    }
-
-                    if (indEnt.getValue().getBirthday().equals(indEnt2.getValue().getBirthday())  && indEnt.getValue().getID() != indEnt2.getValue().getID()) {
-                        errors.add(String.format("US23 Error: There are two same birthdays: " + birthDateFormat.format(indEnt.getValue().getBirthday())));
-                    }
-                }
-
-            }
-        }catch (Exception e) {
-            System.out.println(e.toString());
-        }
-
-    }
-
-    private void uniqueFamilyBySpouse () {//US24
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        Map<String, Family> tempFamilies = new LinkedHashMap(families);
-        try {
-            for (Map.Entry<String, Family> en1 : families.entrySet()) {
-                tempFamilies.remove(en1.getKey());
-                for (Map.Entry<String, Family> en2 : tempFamilies.entrySet()) {
-                    if (en1.getValue().getHusbandName().equals(en2.getValue().getHusbandName()) &&
-                            en1.getValue().getWifeName().equals(en2.getValue().getWifeName())       &&
-                            en1.getValue().getMarried().equals(en2.getValue().getMarried())) {
-                        errors.add("Error US24: there are 2 families(" + en1.getValue().getID() + " and " + en2.getValue().getID() + ") with the same spouses(" + en1.getValue().getHusbandName() + " and " + en1.getValue().getWifeName() + ") getting married in the same date " + formatter.format(en1.getValue().getMarried()));
-                    }
-
+                if(indEnt.getValue().getDeath() !=null) {
+                    deceased.add( indEnt.getValue().getName() + "(" + indEnt.getValue().getID() + ")");
                 }
             }
+
         } catch (Exception e) {
             System.err.println(e.toString());
         }
     }
 
+    private void listLivingMarried() { //US30
+        Iterator<Map.Entry<String, Individual>> indIt = individuals.entrySet().iterator();
 
-    /**
-     * parents can not married child or brother sister's child
-     */
-    public void parentMarryDescendants(){//US17
-        Iterator<Map.Entry<String, Family>> famIt = families.entrySet().iterator();
-        Map<String,HashSet<String>> family = new HashMap<>();
+        try {
+            while (indIt.hasNext()) {
+                Map.Entry<String, Individual> indEnt = indIt.next();
+                Iterator<String> famsIt = indEnt.getValue().getFAMS().iterator();
 
+                if(indEnt.getValue().getDeath() == null) {
+                    while (famsIt.hasNext()) {
 
-        while (famIt.hasNext()){
-            Map.Entry<String, Family> famEnt = famIt.next();
-            String husband = famEnt.getValue().HusbandID;
-            String wife = famEnt.getValue().WifeID;
-            HashSet<String> descendants;
-            descendants = famEnt.getValue().Children;
-            if(descendants.contains(husband)){//prerequisite
-                errors.add("Error US17:"+individuals.get(husband).Name+"is married with descendants");
-                break;
-            }
-            if(descendants.contains(wife)){//prerequisite
-                errors.add("Error US17:"+individuals.get(wife).Name+"is married with descendants");
-                break;
-            }
-            if(family.keySet().contains(husband)){
-                for(String child:descendants){
-                    family.get(husband).add(child);
-                }
-            }
-            else family.put(husband,descendants);
-            if(family.keySet().contains(wife)){
-                for(String child:descendants){
-                    family.get(wife).add(child);
-                }
-            }
-            else family.put(wife,descendants);
-
-            Iterator<Map.Entry<String,HashSet<String>>> predecessor = family.entrySet().iterator();//add any descendants of the child's child
-            while (predecessor.hasNext()){
-                Map.Entry<String,HashSet<String>> pred = predecessor.next();
-                if(descendants.contains(pred.getKey())){
-                    for(String child:pred.getValue()){
-                        descendants.add(child);
+                        livingMarried.add(indEnt.getValue().getName() + "(" + indEnt.getValue().getID() + ")");
+                        break;
                     }
                 }
             }
-        }
-        Iterator<Map.Entry<String,HashSet<String>>> check = family.entrySet().iterator();
-        while(check.hasNext()){
-            Map.Entry<String,HashSet<String>> item = check.next();
-            if(item.getValue().contains(item.getKey())){
-                errors.add("Error US17:"+individuals.get(item.getKey()).Name+"is descendants that married");
-            }
-        }
 
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
     }
 
-    /**
-     * sibling can not be married, parents' brothers and sisters need to be considered
-     */
-    public void noSiblingMarry() {//US18
-        String tempsib = null;
-        Iterator<Map.Entry<String, Family>> famIt = families.entrySet().iterator();
-        Map<String, HashSet<String>> family = new Hashtable<>();
-        while (famIt.hasNext()) {
-            Map.Entry<String, Family> famEnt = famIt.next();
-            String husband = famEnt.getValue().HusbandID;
-            String wife = famEnt.getValue().WifeID;
-            HashSet<String> descendants;
-            descendants = famEnt.getValue().Children;
-
-            if (family.keySet().contains(husband)) {
-                for (String child : descendants) {
-                    family.get(husband).add(child);
-                }
-            } else {
-                family.put(husband, (HashSet<String>) descendants.clone());
-            }
-
-            if (family.keySet().contains(wife)) {
-                for (String child : descendants) {
-                    family.get(wife).add(child);
-                }
-            } else family.put(wife, (HashSet<String>) descendants.clone());
-        }
-        for (String relative : family.keySet()) {
-            for (String sib : family.get(relative)) {
-                if (!family.keySet().contains(sib)) {
-                } else {
-                    tempsib = sib;
-
-                    for (String value : family.get(relative)) {
-                        if (!tempsib.equals(value) && family.containsKey(value)) {
-                            for (String item : family.get(value)) {
-                                family.get(tempsib).add(item);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        Iterator<Map.Entry<String, Family>> famIt2 = families.entrySet().iterator();
-        while (famIt2.hasNext()) {
-            Map.Entry<String, Family> famEnt = famIt2.next();
-            for (String s : family.keySet()) {
-                if (family.get(s).contains(famEnt.getValue().WifeID) && family.get(s).contains(famEnt.getValue().HusbandID)) {
-                    errors.add("Error US18:" + individuals.get(famEnt.getValue().HusbandID).Name + " and " + individuals.get(famEnt.getValue().WifeID).Name + " are siblings");
-                }
-            }
-        }
-
-    }
-
-        public void errorsPrint() {
+    public void errorsPrint() {
         checkErrors();//check with users stories
         File fileOut = new File("resource/family-tree.txt");
         Iterator<String> errIt = errors.iterator();
@@ -877,6 +759,34 @@ public class GED {
             out.close();
         } catch (IOException e) {
             System.err.println(e.toString());
+        }
+    }
+
+    public void listPrint (Set<String> s, String title) {
+        if(s != null){
+            File fileOut = new File("resource/family-tree.txt");
+            Iterator<String> listIt = s.iterator();
+
+            try {
+                if (!fileOut.exists()) {
+                    fileOut.createNewFile();
+                }
+
+                FileWriter fw = new FileWriter(fileOut, true);
+                BufferedWriter out = new BufferedWriter(fw);
+
+                out.write("\r\n");
+                out.write(title);
+
+                while (listIt.hasNext()) {
+                    String list = listIt.next();
+                    out.write(list + "\r\n");
+                }
+
+                out.close();
+            } catch (IOException e) {
+                System.err.println(e.toString());
+            }
         }
     }
 

@@ -19,12 +19,20 @@ public class GedcomReader {
      * @throws java.text.ParseException
      */
     public static void main(String[] args) throws IOException, FileNotFoundException, ParseException {
+        // TODO code application logic here
         GED ged = new GED();
+        //in order to improve the universality, the method should be added a parameter of Path
+        //if so, the print methods confirm whether the GED exist or not
         ged.traversal();
+        
         ged.individualsPrint();
+        
         ged.familiesPrint();
         ged.errorsPrint();
-        
+
+        ged.listPrint(ged.deceased,"US29: Deceased individuals:\r\n");
+        ged.listPrint(ged.livingMarried,"US30 Living Married individuals:\r\n");
+
     }
     
 }

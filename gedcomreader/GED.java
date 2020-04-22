@@ -21,6 +21,7 @@ public class GED {
     Set<String> errors;
     Set<String> deceased;
     Set<String> livingMarried;
+    Set<String> orphans;
 
     public GED() {
         this.individuals = new LinkedHashMap();
@@ -28,28 +29,31 @@ public class GED {
         this.errors = new LinkedHashSet();
         this.deceased = new LinkedHashSet();
         this.livingMarried = new LinkedHashSet();
+        this.orphans = new LinkedHashSet<>();
 
     }
 
     private void checkErrors() {// user story check
-        individualsPrint();
-        familiesPrint();
-        datesBeforeCurrentDate();//US01
-        birthBeforeMarriage();//US02
-        birthBeforeDeath();//US03
-        marriageBeforeDivorce();//US04
-        marriageBeforeDeath();//US05
-        divorceBeforeDeath();//US06
-        lessThan150();//US07
-        birthBeforeMarriageOfParents();//US08
-        BirthBeforeDeathOfParents ();//US09
-        MarriageAfter14();//US10
-        noBigamy();//US11
-        parentNotoold();//US12
-        fewerThan15Siblings(); //US15
-        correctGender(); //US21
-        listDeceased();//US29
-        listLivingMarried(); //US30
+//        individualsPrint();
+//        familiesPrint();
+//        datesBeforeCurrentDate();//US01
+//        birthBeforeMarriage();//US02
+//        birthBeforeDeath();//US03
+//        marriageBeforeDivorce();//US04
+//        marriageBeforeDeath();//US05
+//        divorceBeforeDeath();//US06
+//        lessThan150();//US07
+//        birthBeforeMarriageOfParents();//US08
+//        BirthBeforeDeathOfParents ();//US09
+//        MarriageAfter14();//US10
+//        noBigamy();//US11
+//        parentNotoold();//US12
+//        fewerThan15Siblings(); //US15
+//        correctGender(); //US21
+//        listDeceased();//US29
+//        listLivingMarried(); //US30
+        listorphans();
+        listLargeAgeDifferences();
 
     }
 
@@ -734,7 +738,45 @@ public class GED {
             System.err.println(e.toString());
         }
     }
+    private void listorphans(){//US33
+        Iterator<Map.Entry<String,Family>> famIt = families.entrySet().iterator();
+        try {
+            while (famIt.hasNext()) {
+                Map.Entry<String, Family> famEnt = famIt.next();
+                if(famEnt.getValue().Children!=null){
+                    if(individuals.get(famEnt.getValue().getHusbandID()).Death!=null&&individuals.get(famEnt.getValue().getWifeID()).Death!=null)
+                    {
+                        for(String child:famEnt.getValue().Children){
+                            orphans.add(individuals.get(child).Name+child);
+                        }
+                    }
+                }
 
+            }
+
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+    }
+    private void listLargeAgeDifferences() { //US34
+        Iterator<Map.Entry<String,Family>> famIt = families.entrySet().iterator();
+        Set<String> ageList = new LinkedHashSet<>();
+        int hAge;
+        int wAge;
+
+        try {
+            while (famIt.hasNext()) {
+                Map.Entry<String, Family> famEnt = famIt.next();
+                hAge = GED.getAgeByBirthAndDeath(individuals.get(famEnt.getValue().getHusbandID()).getBirthday(),famEnt.getValue().getMarried());
+                wAge = GED.getAgeByBirthAndDeath(individuals.get(famEnt.getValue().getWifeID()).getBirthday(),famEnt.getValue().getMarried());
+                if (hAge >= wAge * 2 || wAge >= hAge * 2){
+                    errors.add("Family "+famEnt.getValue().getID()+" has a large age difference.");
+                }
+            }
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+    }
     public void errorsPrint() {
         checkErrors();//check with users stories
         File fileOut = new File("resource/family-tree.txt");
@@ -789,6 +831,4 @@ public class GED {
             }
         }
     }
-
-
 }

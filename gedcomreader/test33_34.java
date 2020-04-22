@@ -13,7 +13,7 @@ public class test33_34 {
     public test33_34() {
     }
     @Test
-    public void testlistDeceased () throws IOException, FileNotFoundException, ParseException {
+    public void testlistorphans () throws IOException, FileNotFoundException, ParseException {
         System.out.println("Testing US33");
         GED instance = new GED();
         instance.traversal();
@@ -38,7 +38,7 @@ public class test33_34 {
     }
 
     @Test
-    public void testlistLivingMarried () throws IOException, FileNotFoundException, ParseException {
+    public void testlistLargeAgeDifferences () throws IOException, FileNotFoundException, ParseException {
         System.out.println("Testing US34");
         GED instance = new GED();
         instance.traversal();

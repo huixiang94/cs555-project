@@ -32,6 +32,7 @@ public class GedcomReader {
 
         ged.listPrint(ged.deceased,"US29: Deceased individuals:\r\n");
         ged.listPrint(ged.livingMarried,"US30 Living Married individuals:\r\n");
+        ged.listPrint(ged.livingSingle,"US31 Living Single individuals:\r\n");
         ged.listPrint(ged.orphans,"US33 Orphan:\r\n");
 
     }

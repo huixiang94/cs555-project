@@ -22,6 +22,7 @@ public class GED {
     Set<String> deceased;
     Set<String> livingMarried;
     Set<String> orphans;
+    Set<String> livingSingle;
 
     public GED() {
         this.individuals = new LinkedHashMap();
@@ -30,6 +31,7 @@ public class GED {
         this.deceased = new LinkedHashSet();
         this.livingMarried = new LinkedHashSet();
         this.orphans = new LinkedHashSet<>();
+        this.livingSingle = new LinkedHashSet();
 
     }
 
@@ -50,8 +52,10 @@ public class GED {
 //        parentNotoold();//US12
 //        fewerThan15Siblings(); //US15
 //        correctGender(); //US21
-//        listDeceased();//US29
-//        listLivingMarried(); //US30
+        listDeceased();//US29
+        listLivingMarried(); //US30
+        listLivingSingle();//US31
+        listMultipleBirth();//US32
         listorphans();
         listLargeAgeDifferences();
 
@@ -549,7 +553,7 @@ public class GED {
             System.err.println(e.toString());
         }
     }
-   public void BirthBeforeDeathOfParents () {//US09
+    public void BirthBeforeDeathOfParents () {//US09
         try {
             for (Map.Entry<String,Family> entry: families.entrySet()) {
                 if (individuals.get(entry.getValue().getHusbandID()).getDeath() != null ||
@@ -600,6 +604,7 @@ public class GED {
             System.err.println(e.toString());
         }
     }
+
     public void noBigamy(){ //US11
         Iterator<Map.Entry<String, Family>> famIt = families.entrySet().iterator();
         Set<String> id = new HashSet<>();
@@ -624,6 +629,7 @@ public class GED {
             System.err.println(e.toString());
         }
     }
+
     public void parentNotoold(){ //US12
         Iterator<Map.Entry<String, Family>> famIt = families.entrySet().iterator();
         Calendar husbandBirth = Calendar.getInstance();
@@ -657,6 +663,7 @@ public class GED {
             System.err.println(e.toString());
         }
     }
+
     private void fewerThan15Siblings() { //US15
         Iterator<Map.Entry<String, Family>> famIt = families.entrySet().iterator();
 
@@ -738,6 +745,51 @@ public class GED {
             System.err.println(e.toString());
         }
     }
+
+    private void listLivingSingle() { //US31, age > 30 but never married
+        Iterator<Map.Entry<String, Individual>> indIt = individuals.entrySet().iterator();
+
+        try {
+            while (indIt.hasNext()) {
+                Map.Entry<String, Individual> indEnt = indIt.next();
+                Iterator<String> famsIt = indEnt.getValue().getFAMS().iterator();
+
+                if(indEnt.getValue().getDeath() == null && getAgeByBirthAndDeath(indEnt.getValue().getBirthday(), indEnt.getValue().getDeath()) > 30) {
+                    while (!famsIt.hasNext()) {
+
+                        livingSingle.add(indEnt.getValue().getName() + "(" + indEnt.getValue().getID() + ")");
+                        break;
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+    }
+
+    private void listMultipleBirth() { //US32
+        Iterator<Map.Entry<String,Individual>> indIt = individuals.entrySet().iterator();
+        SimpleDateFormat birthDateFormat = new SimpleDateFormat("MM-dd-yyyy");
+        Set<String> birthList = new LinkedHashSet<>();
+
+        try {
+            while (indIt.hasNext()) {
+                Map.Entry<String, Individual> indEnt = indIt.next();
+                Iterator<Map.Entry<String, Individual>> indIt2 = individuals.entrySet().iterator();
+
+                while (indIt2.hasNext()) {
+                    Map.Entry<String, Individual> indEnt2 = indIt2.next();
+                    if (indEnt.getValue().getBirthday().equals(indEnt2.getValue().getBirthday()) && indEnt.getValue().getID() != indEnt2.getValue().getID()) {
+                        errors.add(String.format("There are two same birthdays: " + birthDateFormat.format(indEnt.getValue().getBirthday())));
+                    }
+                }
+            }
+        }catch (Exception e) {
+            System.out.println(e.toString());
+        }
+    }
+
     private void listorphans(){//US33
         Iterator<Map.Entry<String,Family>> famIt = families.entrySet().iterator();
         try {
